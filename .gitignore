@@ -4,3 +4,6 @@
 config.py
 # Byte-compiled
 __pycache__/
+
+#
+tasks.db
