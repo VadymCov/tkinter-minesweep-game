@@ -4,6 +4,7 @@ from aiogram import Bot,Dispatcher
 from aiogram.types import Message
 from aiogram.filters import Command 
 from aiogram.fsm.storage.memory import MemoryStorage # connect the module state storage in RAM
+from aiogram.fsm.state import State, StatesGroup
 from config import YOUR_TOKEN # Important: config.py is added to .gitignore to prevent token leakage.
 
 bot = Bot(token=YOUR_TOKEN) # Initialize the bot using the token from config.py.
@@ -11,8 +12,11 @@ storage = MemoryStorage() # in-memory state store
 dp = Dispatcher(storage=storage) # bind storage to the manager
 
 
-# Create database
-def init_db():
+class TaskStates(StatesGroup): # Condition for FSM
+    waiting_for_task = State()
+    waiting_for_id = State()
+
+def init_db(): # Create database
     con = sqlite3.connect('user_todo_db')
     cur = con.cursor()
     cur.execute('''
@@ -20,7 +24,7 @@ def init_db():
                 id INTEGER PRIMARY KEY,
                 title TEXT
                 done BOOLEAN
-                )
+                )e
                 ''')
     con.commit()
     con.close()
