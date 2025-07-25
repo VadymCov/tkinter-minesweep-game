@@ -1,5 +1,5 @@
 import asyncio 
-import sqlite3
+import sqlite3 # Connecting the built-in library sqlite3 for storing data in the database
 from aiogram import Bot,Dispatcher
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
@@ -23,8 +23,10 @@ def init_db(): # Create database
     cur.execute('''
             CREATE TABLE IF NOT EXISTS task (
                 id INTEGER PRIMARY KEY,
-                title TEXT
-                done BOOLEAN
+                user_name TEXT,
+                user_id INTEGER,
+                task_name TEXT,
+                is_completed BOOLEAN DEFAULT FALSE
                 )
                 ''')
     con.commit()
@@ -52,3 +54,19 @@ async def add_task_handler(callback: CallbackQuery, state: FSMContext): # add ta
     await state.set_state(TaskStates.waiting_for_task)
     await callback.answer()
 
+
+@dp.message(TaskStates.waiting_for_task)
+async def save_task(message: Message, state: FSMContext): # Getting the task text and saving it to the database
+    user_name = message.from_user.username
+    user_id = message.from_user.id
+    task_name = message.text
+
+    con = sqlite3.connect('user_todo_db')
+    cursor = con.cursor()
+    cursor.execute("INSERT INTO task (user_name, user_id, task_name) VALUES (?, ?)",
+                   (user_name, user_id, task_name))
+    con.commit()
+    con.close()
+
+    await message.answer(f"Task {task_name} added", reply_markup=get_main_menu())
+    await state.clear()
