@@ -23,8 +23,8 @@ def init_db(): # Create database
     cur.execute('''
             CREATE TABLE IF NOT EXISTS task (
                 id INTEGER PRIMARY KEY,
-                user_name TEXT,
                 user_id INTEGER,
+                user_name TEXT,
                 task_name TEXT,
                 is_completed BOOLEAN DEFAULT FALSE
                 )
@@ -62,11 +62,32 @@ async def save_task(message: Message, state: FSMContext): # Getting the task tex
     task_name = message.text
 
     con = sqlite3.connect('user_todo_db')
-    cursor = con.cursor()
-    cursor.execute("INSERT INTO task (user_name, user_id, task_name) VALUES (?, ?)",
+    cur = con.cursor()
+    cur.execute("INSERT INTO task (user_name, user_id, task_name) VALUES (?, ?)",
                    (user_name, user_id, task_name))
     con.commit()
     con.close()
 
     await message.answer(f"Task {task_name} added", reply_markup=get_main_menu())
     await state.clear()
+
+
+@dp.callback_query(lambda c: c.data == "list_task")
+async def show_task_hendler(callback: CallbackQuery ): # function shows all tasks
+    user_id = callback.from_user.id
+    con = sqlite3.connect('user_todo_db')
+    cur = con.cursor()
+    cur.execute("SELECT id, task_name, is_completed FROM tasks WHERE user_id = ?", (user_id,))
+    tasks = cur.fetchall()
+    con.close()
+    if not tasks:
+        await callback.message.edit_text("📑You have no tasks", reply_markup=get_main_menu())
+    else:
+        text = "📑Your Tasks:"
+        for task_id, task_name, is_completed in tasks:
+            status = "✅" if is_completed else "⏳"
+            text += f"\n\n{status} {task_id} {task_name} {is_completed}"
+
+        await callback.message.edit_text(text, reply_markup=get_main_menu())
+
+    await callback.answer()
