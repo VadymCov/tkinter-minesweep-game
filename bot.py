@@ -1,7 +1,7 @@
 import asyncio 
 import sqlite3
 from aiogram import Bot,Dispatcher
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
 from aiogram.filters import Command 
 from aiogram.fsm.storage.memory import MemoryStorage # connect the module state storage in RAM
 from aiogram.fsm.state import State, StatesGroup
@@ -16,14 +16,6 @@ class TaskStates(StatesGroup): # Condition for FSM
     waiting_for_task = State()
     waiting_for_id = State()
 
-def get_main_menu(): # main menu with build-in button
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-    [InlineKeyboardButton(text="add task", callback_data="add_task")],
-    [InlineKeyboardButton(text="delete task", callback_data="delete_task")],
-    [InlineKeyboardButton(text="completed", callback_data="completed")],
-    [InlineKeyboardButton(text="list task", callback_data="list_task")],
-    ])
-
 def init_db(): # Create database
     con = sqlite3.connect('user_todo_db')
     cur = con.cursor()
@@ -36,3 +28,20 @@ def init_db(): # Create database
                 ''')
     con.commit()
     con.close()
+
+def get_main_menu(): # main menu with build-in button
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="add task", callback_data="add_task")],
+        [InlineKeyboardButton(text="delete task", callback_data="delete_task")],
+        [InlineKeyboardButton(text="completed", callback_data="completed")],
+        [InlineKeyboardButton(text="list task", callback_data="list_task")],
+    ])
+    return keyboard
+
+@dp.message(Command("start"))#
+async def start_handler(message:Message): # start command handler
+    user_name = message.from_user.first_mame
+    welcom_text = f"👋Hi {user_name}, a`m a simple task manager.\nManage your time."
+
+    await message.answer(welcom_text, reply_markup=get_main_menu)
+
