@@ -1,7 +1,8 @@
 import asyncio 
 import sqlite3
 from aiogram import Bot,Dispatcher
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
+from aiogram.fsm.context import FSMContext
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
 from aiogram.filters import Command 
 from aiogram.fsm.storage.memory import MemoryStorage # connect the module state storage in RAM
 from aiogram.fsm.state import State, StatesGroup
@@ -44,4 +45,10 @@ async def start_handler(message:Message): # start command handler
     welcom_text = f"👋Hi {user_name}, a`m a simple task manager.\nManage your time."
 
     await message.answer(welcom_text, reply_markup=get_main_menu)
+
+@dp.callback_query(lambda c: c.data == "add_task")
+async def add_task_handler(callback: CallbackQuery, state: FSMContext): # add task command handler
+    await callback.message.edit_text("📑Enter a name for the name task")
+    await state.set_state(TaskStates.waiting_for_task)
+    await callback.answer()
 
