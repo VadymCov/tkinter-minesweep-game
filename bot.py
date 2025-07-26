@@ -21,7 +21,7 @@ def init_db(): # Create database
     con = sqlite3.connect('user_todo_db')
     cur = con.cursor()
     cur.execute('''
-            CREATE TABLE IF NOT EXISTS task (
+            CREATE TABLE IF NOT EXISTS tasks (
                 id INTEGER PRIMARY KEY,
                 user_id INTEGER,
                 user_name TEXT,
@@ -63,7 +63,7 @@ async def save_task(message: Message, state: FSMContext): # Getting the task tex
 
     con = sqlite3.connect('user_todo_db')
     cur = con.cursor()
-    cur.execute("INSERT INTO task (user_name, user_id, task_name) VALUES (?, ?, ?)",
+    cur.execute("INSERT INTO tasks (user_name, user_id, task_name) VALUES (?, ?, ?)",
                    (user_name, user_id, task_name))
     con.commit()
     con.close()
@@ -96,3 +96,23 @@ async def delete_task_handler(callback: CallbackQuery, state: FSMContext): # han
     await callback.message.edit_text(f"📑Enter the number of the task you want to delete:")
     await state.set_state(TaskStates.waiting_for_id)
     await callback.answer()
+
+@dp.message(TaskStates.waiting_for_id)
+async def delete_task(message: Message, state: FSMContext): # the function deletes a task from the db. by id
+    try:
+        task_id = int(message.text)
+        user_id = message.from_user.id
+        con = sqlite3.connect('user_todo_db')
+        cur = con.cursor()
+        cur.execute("DELETE FROM tasks WHERE id=? AND user_id=?", (task_id, user_id))
+        if cur.rowcount > 0:
+            await message.answer(f"✅ Task {task_id} deleted", reply_markup=get_main_menu())
+        else:
+            await message.answer(f"❌ Task not find")
+        con.commit()
+        con.close()
+
+    except ValueError:
+        await message.answer(f"Please entet a valid task number", reply_markup=get_main_menu())
+
+    await state.clear()
