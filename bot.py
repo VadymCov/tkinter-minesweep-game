@@ -63,7 +63,7 @@ async def save_task(message: Message, state: FSMContext): # Getting the task tex
 
     con = sqlite3.connect('user_todo_db')
     cur = con.cursor()
-    cur.execute("INSERT INTO task (user_name, user_id, task_name) VALUES (?, ?)",
+    cur.execute("INSERT INTO task (user_name, user_id, task_name) VALUES (?, ?, ?)",
                    (user_name, user_id, task_name))
     con.commit()
     con.close()
@@ -73,7 +73,7 @@ async def save_task(message: Message, state: FSMContext): # Getting the task tex
 
 
 @dp.callback_query(lambda c: c.data == "list_task")
-async def show_task_hendler(callback: CallbackQuery ): # function shows all tasks
+async def show_task_handler(callback: CallbackQuery ): # function shows all tasks
     user_id = callback.from_user.id
     con = sqlite3.connect('user_todo_db')
     cur = con.cursor()
@@ -89,5 +89,10 @@ async def show_task_hendler(callback: CallbackQuery ): # function shows all task
             text += f"\n\n{status} {task_id} {task_name} {is_completed}"
 
         await callback.message.edit_text(text, reply_markup=get_main_menu())
+    await callback.answer()
 
+@dp.callback_query(lambda c: c.data == "delete_task")
+async def delete_task_handler(callback: CallbackQuery, state: FSMContext): # handler function sets the FSM status
+    await callback.message.edit_text(f"📑Enter the number of the task you want to delete:")
+    await state.set_state(TaskStates.waiting_for_id)
     await callback.answer()
