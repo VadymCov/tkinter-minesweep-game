@@ -1,9 +1,9 @@
-import asyncio 
+import asyncio
 import sqlite3 # Connecting the built-in library sqlite3 for storing data in the database
 from aiogram import Bot,Dispatcher
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery
-from aiogram.filters import Command 
+from aiogram.filters import Command
 from aiogram.fsm.storage.memory import MemoryStorage # connect the module state storage in RAM
 from aiogram.fsm.state import State, StatesGroup
 from config import YOUR_TOKEN # Important: config.py is added to .gitignore to prevent token leakage.
@@ -118,7 +118,33 @@ async def delete_task(message: Message, state: FSMContext): # the function delet
     await state.clear()
 
 @dp.callback_query(lambda c: c.data =='completed')
-async def is_completed_handler(callback: CallbackQuery, state: FSMContext): # handler function sets the FSM status
-    await callback.message.edit_text(f"Please enter the task number", reply_markup=get_main_menu())
-    await state.set_state(TaskStates.waiting_for_id)
+async def is_completed_handler(callback: CallbackQuery): # handler function command user and creates buttons
+    user_id = callback.from_user.id
+    con = sqlite3.connect('user_todo.db')
+    cur = con.cursor()
+    cur.execute("SELECT id, task_name FROM tasks WHERE user_id=? AND is_completed=FALSE", (user_id,))
+    tasks = cur.fetchall()
+    con.close()
+    if not tasks:
+        await callback.message.edit_text(f"❌ No unfinished tasks ", reply_markup=get_main_menu())
+    else:
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text=f"{task_id}. {task_name[:20]}...", collback_data=f"mark_done_{task_id}")]
+            for task_id, task_name in tasks] + [[InlineKeyboardButton(text= "🔃go back", collback_data="back_to_menu")]])
+
+    # Alternative entry create button
+    # tasks_buttons = []
+    # for task_id, task_name in tasks:
+    #     button = InlineKeyboardButton(text=f"{task_id}. {task_name[:20]}...", collback_data=f"mark_done_{task_id}")
+    #
+    #     task_buttons.append([button]) # each button on a separate line
+    #
+    # back_button = [InlineKeyboardButton(text="go back", collback_data="back_to_menu")]
+    # task_buttons.append(back_button)
+    #
+    # InlineKeyboardMarkup(inline_keyboard=tasks_board)
+    #
+        await callback.message.edit_text(f"✅ Select the task number", reply_markup=keyboard)
+
     await callback.answer()
+
