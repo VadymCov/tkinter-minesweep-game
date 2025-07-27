@@ -116,3 +116,9 @@ async def delete_task(message: Message, state: FSMContext): # the function delet
         await message.answer(f"Please entet a valid task number", reply_markup=get_main_menu())
 
     await state.clear()
+
+@dp.callback_query(lambda c: c.data =='completed')
+async def is_completed_handler(callback: CallbackQuery, state: FSMContext): # handler function sets the FSM status
+    await callback.message.edit_text(f"Please enter the task number", reply_markup=get_main_menu())
+    await state.set_state(TaskStates.waiting_for_id)
+    await callback.answer()
