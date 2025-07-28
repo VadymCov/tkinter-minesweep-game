@@ -1,9 +1,21 @@
 # Virtual environment
 .venv/
-# Python file with token
+venv/
+env/
 
+# Python configuration with sensitive data
 config.py
+
+# Python cache
 __pycache__/
 
-# Data Base
-tasks.db
+# Database files
+*.db
+
+# IDE files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
