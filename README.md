@@ -11,11 +11,6 @@ Requirements ❗
 
 Files
 
-```
-project/
-├── run.py # Main game file
-└── boom.ico # Application icon
-```
 
 ✅Launch
 
