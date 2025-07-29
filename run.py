@@ -1,35 +1,37 @@
-import sys
-from tkinter import *
+import tkinter as tk
 from tkinter import messagebox
-from PIL import Image, ImageTk
+import random
 
-class Game:
-    
+
+class DifficultyLevel:
     def __init__(self):
+        self.root = tk.Tk()
+
         
-        # Games variables
-        self.current_move = 'O' 
-        self.win = False
-        self.buttons = dict()
-        # Run widget, Run GUI
-        self.root = Tk()
-        self.root.withdraw()
-        self.settings()
-        self.root.resizable(False, False)
-        # self.root.geometry('300x200')
-        self.root.iconbitmap('images/XO.ico')
-        self.root.title('')
+class GameWidgets:
 
-        self.image_games()
-        self.widget()
-        self.create_button()
+    def __init__(self):
+        # Game settings
+        self.root = tk.Tk()
+        self.root.withdraw() # Скрыть окно
+        self.root.resizable(False,False)
+        self.root.title('Miner game')
+        self.root.iconbitmap('image/boom.ico')
+
+
+        self.size_field = 9
+        self.number_mines = 30
+        self.game_field()
+        self.game_widgets_menu()
+        self.buttons_config()
+        self.mines_field()
+        self.window_in_the_center()
         self.root.mainloop()
-
- 
+    
     def window_in_the_center(self):
-        # Wait for the final rendering, всех widgets
+        # Wait for the final rendering of all widgets
         self.root.update_idletasks()
-         # Отобразить окно
+        # Show window
         self.root.deiconify()
         width = self.root.winfo_width()
         height = self.root.winfo_height()
@@ -37,178 +39,172 @@ class Game:
         y = (self.root.winfo_screenheight() // 2) - (height // 2)
         self.root.geometry(f'{width}x{height}+{x}+{y}')
 
+    def game_field(self):
+        self.top_margin = tk.Frame(self.root)
+        self.top_margin.pack(fill='both')
+        self.playing_field = tk.Frame(self.root)
+        self.playing_field.pack(fill='both', expand=True)
 
-    def settings(self):
-        self.settings_windows = Toplevel(bg='black')
-        self.settings_windows.title('settings')
-        self.settings_windows.geometry('300x200')
-        self.settings_windows.config(bg='black')
-        self.settings_windows.resizable(False, False)
-        self.settings_windows.iconbitmap('images/settings.ico')
-        self.settings_windows.protocol("WM_DELETE_WINDOW", lambda: None)
-        self.windows_settings_display_center()
-        self.settings_widgets()
+    def game_widgets_menu(self):
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
+        # tearoff=False Turns off the dotted line at the beginning of the menu ❗
+        game_menu = tk.Menu(menubar, tearoff=False)
+        game_level = tk.Menu(menubar, tearoff=False)
+        menubar.add_cascade(menu=game_menu, label='Game')
+        menubar.add_cascade(menu=game_level, label='Level')
 
-    def windows_settings_display_center(self):
+        game_menu.add_command(label='New games', command= self.restart_game)
+        game_menu.add_command(label='Exit games', command= self.root.destroy)
+
+        game_level.add_command(label=f'Easy 9/30 min', command= lambda f = 9, m = 30: self.handler_cmd(f ,m))
+        game_level.add_command(label=f'Medium 15/50 min', command= lambda f = 15, m = 50: self.handler_cmd(f ,m))
+        game_level.add_command(label=f'Difficult 18/80 min', command= lambda f = 18, m = 80: self.handler_cmd(f ,m))
+
+
+    def handler_cmd(self, f, m):
         # Hide window
-        self.settings_windows.withdraw()
-        # Display window centeredу
-        width = self.settings_windows.winfo_width()
-        height = self.settings_windows.winfo_height()
-        x = (self.settings_windows.winfo_screenwidth() // 2) - (width // 2)
-        y = (self.settings_windows.winfo_screenheight() // 2) - (height // 2)
-        self.settings_windows.geometry(f'{width}x{height}+{x}+{y}')
-        self.settings_windows.configure(bg='black')
-        # Show window
-        self.settings_windows.deiconify()
-
-    def settings_widgets(self):
-        Label(self.settings_windows, text="Do you want to play first?", font= ("Arial", 15), bg= 'black', fg= 'white').pack()
-
-        Button(self.settings_windows, text= "Yes", command=self.start_game_as_x,
-                bg= 'black', fg= 'white', activeforeground= 'white',activebackground= 'black'
-                ).pack(fill="both", padx=5, pady=5, ipadx=5,ipady=5)
-        Button(self.settings_windows, text= "No", command= self.start_game_as_o,
-                bg= 'black', fg= 'white', activeforeground= 'white', activebackground='black'
-                ).pack(fill='both', padx=5, pady=5, ipadx=5, ipady=5)
-        Button(self.settings_windows, text= "Exit", command= sys.exit,
-                bg= 'black', fg= 'white', activeforeground= 'white', activebackground= 'black'
-                ).pack(fill='both', padx=5, pady=5, ipadx=5, ipady=5)
-
-    def start_game_as_x(self):
-        self.current_move = 'X'
-        self.settings_windows.destroy()
-        self.window_in_the_center()
-
-    def start_game_as_o(self):
-        self.current_move = 'O' 
-        self.settings_windows.destroy()
-        self.window_in_the_center()
-        self.computer_move()    
-
-
-    def image_games(self):
-        img_x = Image.open('images/X.png')
-        r_x_img = img_x.resize((100,100))
-        self.button_x = ImageTk.PhotoImage(r_x_img)
-
-        img_o = Image.open('images/O.png')
-        r_o_img = img_o.resize((100,100))
-        self.button_o = ImageTk.PhotoImage(r_o_img)
-
-        img_f = Image.open('images/F.png')
-        r_f_img = img_f.resize((100,100))
-        self.button_f = ImageTk.PhotoImage(r_f_img)
-
-
-    def widget(self):
-        self.line1 = Frame(self.root)
-        self.line1.pack(side='top', expand=YES)
-
-    def create_button(self):
-        for x in range (3):
-            for y in range (3):
-                btt = Button(self.line1,  image=self.button_f, bg='black',
-                            command= lambda xx = x, yy= y: self.button_click(xx, yy),
-                            )
-                btt.grid(row= x, column= y, ipadx = 1, ipady= 1, padx=1, pady=1 )
-                click = 'empty'
-                self.buttons[(x,y)] = [btt,click]
-    # The human move
-    def button_click(self, x, y):
-        if self.buttons[x, y][1] == 'empty':
-            self.buttons[x, y][0]['image'] = self.button_x
-            self.buttons[x, y][1] = 'x'
-            self.current_move = 'O'
-            self.computer_move()
-            if self.check_win:
-                if self.games_messages():
-                    self.restart_game()
-                else:
-                    sys.exit()
-    @property
-    def check_win(self):
-        COMB_WIN = (((0, 0), (0, 1), (0, 2)),
-                    ((1, 0), (1, 1), (1, 2)),
-                    ((2, 0), (2, 1), (2, 2)),
-                    ((0, 0), (1, 1), (2, 2)),
-                    ((0, 2), (1, 1), (2, 0)),
-                    ((0, 0), (1, 0), (2, 0)),
-                    ((0, 1), (1, 1), (2, 1)),
-                    ((0, 2), (1, 2), (2, 2)),
-                    )
-        for i in COMB_WIN:
-            if self.buttons[i[0]][1] == self.buttons[i[1]][1] == self.buttons[i[2]][1] != 'empty':
-                return self.buttons[i[0]][1]
-            if all(v[1] != 'empty' for v in self.buttons.values()):
-                return 'draw'
-    
-    
-
-    def computer_move(self):
-        best_move = [(1,1), (0,0), (0,2), (2,0), (2,2), (0,1), (2,1), (1,0), (1,2)]
-        move = self.logical_move
-        if self.current_move == 'O':
-            if move:
-                self.buttons[move][1] = 'o'
-                self.buttons[move][0]['image'] = self.button_o
-                self.current_move = 'X'
-                return
-            
-            for i in best_move:
-                if self.buttons[i][1] == 'empty':
-                    self.buttons[i][1] = 'o'
-                    self.buttons[i][0]['image'] = self.button_o
-                    self.current_move = 'X'
-                    break
-         
-                    
-    @property
-    def logical_move (self):
-        for k, v in self.buttons.items():
-            if v[1] not in ('x', 'o'):
-                original = v[1]
-                v[1] = 'o'
-                if self.check_win == 'o':
-                    v[1] = original
-                    return k
-                v[1] = original
-        
-        for k, v in self.buttons.items():
-            if v[1] not in ('x', 'o'):
-                original = v[1]
-                v[1] = 'x'
-                if self.check_win == 'x':
-                    v[1] = original
-                    return k
-                v[1] = original
-        return None
-
-    def games_messages(self):
-        if self.check_win == 'x': #in  ('x', 'o', 'draw'):
-            message = messagebox.askyesno(message="You Win \nDont you want to play again?",
-                                           title='tic_tac_toe')
-            return message
-        
-        elif self.check_win == 'o':
-            message = messagebox.askyesno(message="You los \nDont you want to play again?",
-                                           title='tic_tac_toe')
-            return message
-        
-        else:
-            message = messagebox.askyesno(message="DRAW \nDont you want to play again?",
-                                           title='tic_tac_toe')
-            return message
-
-    
-    def restart_game(self):
         self.root.withdraw()
-        self.settings()
+        # Kills all widgets on the field 💥
+        for widget in self.playing_field.winfo_children():
+            widget.destroy()
+        self.size_field = f
+        self.number_mines = m
+        # Clear all previous coordinates
         self.buttons.clear()
-        self.create_button()
+        self.clicked.clear()    
+        self.mines.clear()
+        # Redraw button widgets, generate mines
+        self.buttons_config()
+        self.mines_field()
+        # Knocks down the window geometry to re-draw it
+        self.root.geometry('')
+        self.window_in_the_center()
+        # Wait for the final rendering of all widgets
+        self.root.update_idletasks()
+        # Show window
+        self.root.deiconify()
+
+
+    def buttons_config(self):
+        self.clicked = {}
+        self.buttons = []
+        for i in range(self.size_field):
+            buttons = []
+            for j in range(self.size_field):
+                # left click
+                btt = tk.Button(self.playing_field, width=3, text=' ', bg='#C1CDCD')
+                btt.config(command=lambda x=i, y=j: self.left_click(x, y))
+                btt.grid( row=i, column=j)
+                # right click
+                btt.bind('<Button-3>', lambda event, x=i, y=j: self.right_click(x, y))
+                buttons.append(btt)
+                self.clicked[(i,j)] = False
+            self.buttons.append(buttons)
+
+    # The function determines the coordinates of the mines on the field
+    def mines_field(self):
+        self.mines = set()
+        while len(self.mines) < self.number_mines:
+            i = random.randint(0,self.size_field - 1)
+            j = random.randint(0,self.size_field - 1)
+            self.mines.add((i,j))
+
+    def left_click(self, x, y):
+        self.check_lose(x,y)
+        self.reveal_cell(x, y)
+        self.check_win()
+
+    def reveal_cell(self, x, y):
+        mines = self.nearest_mines(x, y)
+        if not (0 <= x < self.size_field and 0 <= y < self.size_field):
+            return
+        if self.clicked.get((x,y),False):
+            return
+        self.buttons[x][y].config(text=str(mines) if mines > 0 else ' ' , bg='#FAEBD7', state="disable" )
+        self.clicked[(x, y)] = True
+        if mines == 0:
+            coordinates = [0,-1],[0,1],[-1,-1],[-1,0],[-1,1],[1,-1],[1,0],[1,1]
+            for n in coordinates:
+                nx = n[1]
+                ny = n[0]
+                if nx != 0 or ny != 0:
+                    self.reveal_cell(x+ nx, y+ ny)
+
+    # This function counts the number of mines around a cell
+    def nearest_mines(self, x, y):
+        count = 0
+        coordinate = ([0,-1],[0,1],[-1,-1],[-1,0],[-1,1],[1,-1],[1,0],[1,1])
+        for n in coordinate:
+            nx = x + n[0] 
+            ny = y + n[1]
+            # Check that the coordinates of the playing field do not go beyond the boundaries of the playing field
+            if 0 <= nx < self.size_field and 0 <= ny < self.size_field:
+                if (nx,ny) in self.mines:
+                    count += 1
+        return count
+
+    def right_click(self, x, y):
+        btt = self.buttons[x][y]
+        if  not self.clicked.get((x,y),False):
+            current_text = btt.cget('text')
+            if current_text == ' ':
+                btt['text'] = '🚩'
+                btt['bg'] = 'yellow'
+            else:
+                btt['text'] = ' '
+                btt['bg'] = '#838B8B'
+
+        # Ends the game if the entire board is open
+    def check_win(self):
+        count = list()
+        for k in self.clicked.keys():
+            if self.clicked[k] == False:
+                count.append(k)
+        # Leads to mines
+        if len(count) == self.number_mines:
+            for x,y in count:
+                self.buttons[x][y].config(text='💣', bg='red')
+            # Let's play yes/no again
+            message_los = messagebox.askyesno(message="You WIN\nDo you want to play again?", title='  Miner')
+            if message_los:
+                self.restart_game() 
+            else:
+                self.root.destroy()
+
+    def check_lose(self, x, y):
+        if (x, y) in self.mines:
+            self.open_field(x, y)
+            for  m_c in self.mines:
+                self.buttons[m_c[0]][m_c[1]].config(text='💣', bg='red', state='normal')
+            message_los = messagebox.askyesno(message="You los\nDo you want to play again?", title='  Miner')
+            if message_los:
+                self.restart_game()
+            else:
+                self.root.destroy()
+
+    def open_field(self, x, y):
+        for k,v in self.clicked.items():
+            if v == False:
+                mines = self.nearest_mines(k[0],k[1])
+                self.buttons[k[0]][k[1]].config(text= str(mines) if mines > 0 else ' ' , bg='#FAEBD7', state="disable")
+                self.clicked[k] = True
+    
+
+    def restart_game(self):
+        self.root.destroy()
+        if __name__ == '__main__':
+            GameWidgets()
+
+
+
+
         
+
+
+
 
 
 
 if __name__ == '__main__':
-    Game()
+    GameWidgets()

@@ -1,1 +1,1 @@
-pillow
+# All libraries used are included in the standard Python distribution

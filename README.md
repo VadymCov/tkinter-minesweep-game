@@ -1,29 +1,41 @@
-Tic-Tac-Toe Game
+# Minesweeper Game 💣
 
-![Screen game](images/Screen_game.jpg)
+![ Screen Game 💣](image/Screen-game.jpg)
 
-A simple tic-tac-toe game with a graphical interface in Python.
+Classic Minesweeper game with a graphical interface in Python. 👍
 
 Requirements ❗
-Python 3.x
-tkinter (usually included in the standard Python distribution)
-Pillow (PIL)
 
-✅ bashpip install Pillow
+- Python 3.x
+- tkinter (included in the standard Python package)
 
-Launch
-bashpython run.py
-Features
+Files
 
-Play against the computer
-Selecting the first move (crosses or zeros)
-Smart AI with priority moves
-Restart option games
+```
+project/
+├── run.py # Main game file
+└── boom.ico # Application icon
+```
 
-🕹 Controls
+✅Launch
 
-🎉 Start the game
+```bash
+python run.py
+```
 
-Choose whether you want to play first
-Click on the cells to make moves
-After finishing the game, you can start over
+✅ Difficulty levels
+
+- **Easy**: 9x9 field, 30 min
+- **Medium**: 15x15 field, 50 min
+- **Hard**: 18x18 field, 80 min
+
+✅ Controls
+
+- **Left click** - open a cell
+- **Right click** - check/uncheck 🚩
+- **Game menu** - new game or exit
+- **Level menu** - difficulty selection
+
+✅ Objective of the game
+
+Open all cells without stepping on a mine. The numbers show the number of mines in adjacent cells.
